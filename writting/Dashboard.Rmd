@@ -52,9 +52,36 @@ Column {data-width=650}
 ### Chart A
 
 ```{r}
-ratings %>% group_by(title) %>% summarize(overall_rat)
-  ggplot(aes(x=seasonNumber, y=av_rating)) +
-  geom_point()
+#Casey
+
+summary <- ratings %>%
+  group_by(title) %>%
+  summarize(overall_rat = mean(av_rating),
+            num_seasons = max(seasonNumber)) %>% 
+  mutate(renewed = num_seasons > 1)
+
+summary %>% 
+  ggplot(aes(x=num_seasons, y=overall_rat)) +
+  geom_point() +
+  labs(x="Number of Seasons",
+       y = "Overall Rating") +
+  geom_smooth(method="lm")
+
+#does the show's overall rating predict whether the number of seasons it'll have?
+summ_lm <- lm(num_seasons ~ overall_rat, data=summary)
+summary(summ_lm)
+#no
+
+#does the show's overall rating predict whether it will be renewed?
+renewal_lm <- lm(renewed ~ overall_rat, summary)
+summary(renewal_lm)
+#yes
+
+
+ratings %>% group_by(title) %>% mutate(renewed = max(seasonNumber > 1)) %>% 
+  filter(seasonNumber == 1) %>% 
+  summarize(renewed = renewed,
+            season1rat = av_rating)
 ```
 
 Column {data-width=350}
@@ -69,6 +96,11 @@ Column {data-width=350}
 ### Chart C
 
 ```{r}
+genres_nest <- wide_ratings %>% 
+  group_by(genres) %>% 
+  nest()
+  
+  
 
 ```
 
