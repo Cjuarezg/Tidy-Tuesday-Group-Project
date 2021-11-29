@@ -19,7 +19,7 @@ head(ratings)
 
 ```{r}
 #make a wider version of the data (one row per show)
-wide_ratings <- ratings %>% pivot_wider(id_cols = title,
+wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres),
                         names_from = seasonNumber,
                         names_prefix = "season_",
                         names_sort = TRUE,
@@ -36,7 +36,9 @@ Column {data-width=650}
 ### Chart A
 
 ```{r}
-
+ratings %>% group_by(title) %>% summarize(overall_rat)
+  ggplot(aes(x=seasonNumber, y=av_rating)) +
+  geom_point()
 ```
 
 Column {data-width=350}
