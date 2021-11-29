@@ -53,6 +53,11 @@ Column {data-width=350}
 ### Chart C
 
 ```{r}
+genres_nest <- wide_ratings %>% 
+  group_by(genres) %>% 
+  nest()
+  
+  
 
 ```
 
