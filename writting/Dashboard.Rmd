@@ -12,8 +12,21 @@ library(tidyverse)
 ```
 
 ```{r}
+#read in the data (longer, one row per season)
 ratings <- read_csv("../data/IMDb_Economist_tv_ratings.csv")
 head(ratings)
+```
+
+```{r}
+#make a wider version of the data (one row per show)
+wide_ratings <- ratings %>% pivot_wider(id_cols = title,
+                        names_from = seasonNumber,
+                        names_prefix = "season_",
+                        names_sort = TRUE,
+                        values_from = av_rating,
+                        values_fill = NA) %>% 
+                unnest(cols = season_1:season_44)
+head(wide_ratings)
 ```
 
 
