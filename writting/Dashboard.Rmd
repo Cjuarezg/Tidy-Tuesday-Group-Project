@@ -12,6 +12,8 @@ library(tidyverse)
 library(lubridate)
 library(ggthemes)
 library(broom)
+library(ggbeeswarm)
+library(plotly)
 ```
 
 ```{r}
@@ -121,16 +123,18 @@ rating_genre <- ratings %>%
                                 ymd("2000-01-01"),ymd("2010-01-01"),
                                 ymd("2019-12-31")),
                      labels=c("80's","90's",
-                              "2000-2009","2010-2019")))
+                              "2000-2009","2010-2018")))
 ggplot(data = rating_genre)+
-  geom_boxplot(aes(y = overall_rating, x=genre, color=genre))+
-  facet_wrap(~periode, ncol = 1)+
+  geom_violin(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.5)+
+  geom_boxplot(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
+  facet_wrap(~periode, ncol = 3)+
   labs(x = "genres", 
         y = "average rating across all seasons", 
        color= "")+
   theme_few()+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)
-        , legend.position = "none")
+  theme(legend.position = "none")+
+  coord_flip()
+  
   
   
   
