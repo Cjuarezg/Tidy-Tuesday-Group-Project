@@ -9,6 +9,7 @@ output:
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
+library(lubridate)
 ```
 
 ```{r}
@@ -29,6 +30,21 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres),
 head(wide_ratings)
 ```
 
+```{r}
+#Carlos 
+
+#format data for hairball plot 
+
+
+ratings %>%
+  select(!share) %>%
+  select(!seasonNumber) %>%
+  mutate(date = (ymd(date))) %>%
+  mutate(start_year = year(date)) %>%
+  group_by(title) %>%
+  filter(start_year == min(start_year))
+
+```
 
 Column {data-width=650}
 -----------------------------------------------------------------------
