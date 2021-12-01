@@ -115,10 +115,10 @@ rating_genre <- ratings %>%
                                 ymd("2000-01-01"),ymd("2010-01-01"),
                                 ymd("2019-12-31")),
                      labels=c("80's","90's",
-                              "2000-2009","2010-2019")))
+                              "2000-2009","2010-2018")))
 ggplot(data = rating_genre)+
   geom_boxplot(aes(y = overall_rating, x=genre, color=genre))+
-  facet_wrap(~periode, ncol = 1)+
+  facet_wrap(~periode, ncol = 2)+
   labs(x = "genres", 
         y = "average rating across all seasons", 
        color= "")+
