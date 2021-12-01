@@ -54,6 +54,19 @@ ratings %>%
   group_by(title) %>%
   filter(start_year == min(start_year))
 
+# for bigraph
+nodes_3 <- shows %>%
+  select(title, genres) %>%
+  group_by(title) %>% 
+  unique() %>%
+  tibble() %>%
+  mutate(genres = gsub("-", "", genres)) %>%
+  mutate(genres = gsub("Drama", "", genres)) %>%
+  mutate(genres = gsub("Drama,", "",genres)) %>%
+  unnest_tokens(output = describer_bigrams, input = genres, token = "ngrams", n = 2) %>% 
+  count(describer_bigrams, sort = TRUE) %>%
+  ungroup() %>%
+  filter(!is.na(describer_bigrams))
 ```
 
 Column {data-width=650}
