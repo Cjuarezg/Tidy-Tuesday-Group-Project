@@ -11,12 +11,19 @@ library(flexdashboard)
 library(tidyverse)
 library(lubridate)
 library(ggthemes)
+library(broom)
 ```
 
 ```{r}
 #read in the data (longer, one row per season)
 ratings <- read_csv("../data/IMDb_Economist_tv_ratings.csv")
-head(ratings)
+ratings <- ratings %>% 
+  mutate(periode = cut(x = date, 
+                     breaks = c(ymd("1980-01-01"), ymd("1990-01-01"),
+                                ymd("2000-01-01"), ymd("2010-01-01"),
+                                ymd("2019-12-31")),
+                     labels=c("80's","90's",
+                              "2000-2009","2010-2019")))
 ```
 
 ```{r}
@@ -54,35 +61,34 @@ Column {data-width=650}
 
 ```{r}
 #Casey
-
-summary <- ratings %>%
+renew <- ratings %>%
   group_by(title) %>%
-  summarize(overall_rat = mean(av_rating),
-            num_seasons = max(seasonNumber)) %>% 
-  mutate(renewed = num_seasons > 1)
-
-summary %>% 
-  ggplot(aes(x=num_seasons, y=overall_rat)) +
-  geom_point() +
-  labs(x="Number of Seasons",
-       y = "Overall Rating") +
-  geom_smooth(method="lm")
-
-#does the show's overall rating predict whether the number of seasons it'll have?
-summ_lm <- lm(num_seasons ~ overall_rat, data=summary)
-summary(summ_lm)
-#no
-
-#does the show's overall rating predict whether it will be renewed?
-renewal_lm <- lm(renewed ~ overall_rat, summary)
-summary(renewal_lm)
-#yes
-
-
-ratings %>% group_by(title) %>% mutate(renewed = max(seasonNumber > 1)) %>% 
+  mutate(overall_rat = mean(av_rating),
+         renewed = max(seasonNumber > 1)) %>% 
   filter(seasonNumber == 1) %>% 
-  summarize(renewed = renewed,
-            season1rat = av_rating)
+  summarize(title = title,
+            renewed = as.logical(renewed),
+            season1rat = av_rating,
+            periode = periode) %>% 
+  ungroup() %>% 
+  group_by(periode)
+
+#only did t-test for all years
+#need to nest(?) to run t-test by periode/decade
+t.test(season1rat ~ renewed, data=renew) %>% tidy() %>% select(p.value)
+
+renew %>% 
+  ggplot(aes(x=renewed, y=season1rat)) +
+  geom_point() +
+  labs(x="Renewed",
+       y = "Season 1 Rating") +
+  stat_summary(fun = 'mean', geom="bar", aes(alpha=0.5)) +
+  theme(legend.position = "none") +
+  geom_bracket(xmin="FALSE",
+               xmax="TRUE",
+               y.position=10.5,
+               label="p < 5.1e-12") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 ```
 
 Column {data-width=350}
