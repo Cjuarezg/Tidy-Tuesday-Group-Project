@@ -95,9 +95,17 @@ rating_genre <- ratings %>%
                                 ymd("2019-12-31")),
                      labels=c("80's","90's",
                               "2000-2009","2010-2018")))
-ggplot(data = rating_genre)+
+
+top_three <- rating_genre %>% 
+  arrange(desc(overall_rating)) %>% 
+  group_by(genre, periode) %>% 
+  slice(c(1,n()))
+
+plot <- ggplot(data = rating_genre)+
   geom_violin(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.5)+
-  geom_boxplot(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
+  #geom_boxplot(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
+  geom_point(data=top_three, aes(x=genre, y=overall_rating, 
+                                 color= genre, fill=genre), size=0.5)+
   facet_wrap(~periode, ncol = 3)+
   labs(x = "genres", 
         y = "average rating across all seasons", 
@@ -105,6 +113,8 @@ ggplot(data = rating_genre)+
   theme_few()+
   theme(legend.position = "none")+
   coord_flip()
+  
+  ggplotly(plot)
   
   
   
