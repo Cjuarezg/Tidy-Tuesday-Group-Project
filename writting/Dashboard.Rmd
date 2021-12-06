@@ -13,127 +13,67 @@ library(lubridate)
 library(ggthemes)
 library(broom)
 library(ggbeeswarm)
-library(plotly)
+library(tidytext)
+library(ggpubr)
 ```
 
 ```{r}
-#read in the data (longer, one row per season)
+#read in the data (long, one row per season)
 ratings <- read_csv("../data/IMDb_Economist_tv_ratings.csv")
 ratings <- ratings %>% 
   mutate(periode = cut(x = date, 
                      breaks = c(ymd("1980-01-01"), ymd("1990-01-01"),
                                 ymd("2000-01-01"), ymd("2010-01-01"),
                                 ymd("2019-12-31")),
-                     labels=c("80's","90's",
-                              "2000-2009","2010-2019")))
+                     labels=c("1980s","1990s",
+                              "2000s","2010s")))
 ```
 
 ```{r}
-#make a wider version of the data (one row per show)
-wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres),
+#wide version of the data (one row per show)
+wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
                         names_from = seasonNumber,
                         names_prefix = "season_",
                         names_sort = TRUE,
                         values_from = av_rating,
                         values_fill = NA) %>% 
                 unnest(cols = season_1:season_44)
-head(wide_ratings)
 ```
 
-```{r}
-#Carlos 
-
-#format data for hairball plot 
-
-
-ratings %>%
-  select(!share) %>%
-  select(!seasonNumber) %>%
-  mutate(date = (ymd(date))) %>%
-  mutate(start_year = year(date)) %>%
-  group_by(title) %>%
-  filter(start_year == min(start_year))
-
-# for bigraph
-nodes_3 <- shows %>%
-  select(title, genres) %>%
-  group_by(title) %>% 
-  unique() %>%
-  tibble() %>%
-  mutate(genres = gsub("-", "", genres)) %>%
-  mutate(genres = gsub("Drama", "", genres)) %>%
-  mutate(genres = gsub("Drama,", "",genres)) %>%
-  unnest_tokens(output = describer_bigrams, input = genres, token = "ngrams", n = 2) %>% 
-  count(describer_bigrams, sort = TRUE) %>%
-  ungroup() %>%
-  filter(!is.na(describer_bigrams))
-```
-
-Column {data-width=650}
+Column {data-width=500}
 -----------------------------------------------------------------------
 
 ### Chart A
 
-```{r}
-#Casey
-renew <- ratings %>%
-  group_by(title) %>%
-  mutate(overall_rat = mean(av_rating),
-         renewed = max(seasonNumber > 1)) %>% 
-  filter(seasonNumber == 1) %>% 
-  summarize(title = title,
-            renewed = as.logical(renewed),
-            season1rat = av_rating,
-            periode = periode) %>% 
-  ungroup() %>% 
-  group_by(periode)
+```{r carlos}
+#format data for hairball plot 
 
-#only did t-test for all years
-#need to nest(?) to run t-test by periode/decade
-t.test(season1rat ~ renewed, data=renew) %>% tidy() %>% select(p.value)
 
-renew %>% 
-  ggplot(aes(x=renewed, y=season1rat)) +
-  geom_point() +
-  labs(x="Renewed",
-       y = "Season 1 Rating") +
-  stat_summary(fun = 'mean', geom="bar", aes(alpha=0.5)) +
-  theme(legend.position = "none") +
-  geom_bracket(xmin="FALSE",
-               xmax="TRUE",
-               y.position=10.5,
-               label="p < 5.1e-12") +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+#ratings %>%
+#  select(!share) %>%
+#  select(!seasonNumber) %>%
+#  mutate(date = (ymd(date))) %>%
+#  mutate(start_year = year(date)) %>%
+#  group_by(title) %>%
+#  filter(start_year == min(start_year))
+
+# for bigraph
+#nodes_3 <- shows %>%
+#  select(title, genres) %>%
+#  group_by(title) %>% 
+#  unique() %>%
+#  tibble() %>%
+#  mutate(genres = gsub("-", "", genres)) %>%
+#  mutate(genres = gsub("Drama", "", genres)) %>%
+#  mutate(genres = gsub("Drama,", "",genres)) %>%
+#  unnest_tokens(output = describer_bigrams, input = genres, token = "ngrams", n = 2) %>% 
+#  count(describer_bigrams, sort = TRUE) %>%
+#  ungroup() %>%
+#  filter(!is.na(describer_bigrams))
 ```
 
-Column {data-width=350}
------------------------------------------------------------------------
 
 ### Chart B
-
-```{r megan}
-#Interactive table of top shows by year
-top_shows <- ratings %>%
-  select(title, date, av_rating, genres) %>%
-  mutate(date = ymd(date),
-         year = year(date)) %>%
-  separate(genres,into=c("genre1","genre2","genre3")
-           ,sep = ",") %>% 
-  pivot_longer(cols = c("genre1","genre2","genre3"),
-               values_to = "genre")
-  
-
-top_shows %>%
-  filter(year == 2016) %>%
-  group_by(genre) %>%
-  slice_max(av_rating,n = 1) %>%
-  ggplot +
-  geom_col(aes(x = av_rating, y = title, fill = fct_reorder(genre, av_rating)))
-  
-
-```
-
-### Chart C
 
 ```{r maelle}
 rating_genre <- ratings %>% 
@@ -179,3 +119,68 @@ ggplot(data = rating_genre)+
 
 ```
 
+
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r megan}
+#Interactive table of top shows by year
+top_shows <- ratings %>%
+  select(title, date, av_rating, genres) %>%
+  mutate(date = ymd(date),
+         year = year(date)) %>%
+  separate(genres,into=c("genre1","genre2","genre3")
+           ,sep = ",") %>% 
+  pivot_longer(cols = c("genre1","genre2","genre3"),
+               values_to = "genre")
+  
+
+top_shows %>%
+  filter(year == 2016) %>%
+  group_by(genre) %>%
+  slice_max(av_rating,n = 1) %>%
+  ggplot +
+  geom_col(aes(x = av_rating, y = title, fill = fct_reorder(genre, av_rating)))
+  
+
+```
+
+
+### Chart D
+
+```{r casey}
+renew <- ratings %>%
+  group_by(title) %>%
+  mutate(overall_rat = mean(av_rating),
+         renewed = max(seasonNumber > 1)) %>% 
+  filter(seasonNumber == 1) %>% 
+  summarize(title = title,
+            renewed = as.logical(renewed),
+            season1rat = av_rating,
+            periode = periode) %>% 
+  ungroup() %>% 
+  group_by(periode)
+
+#only did t-test for all years
+#need to nest(?) to run t-test by periode/decade
+pval1 <- t.test(season1rat ~ renewed, data=renew) %>%
+  tidy() %>%
+  pull(p.value) %>%
+  formatC(., format = "e", digits = 2)
+
+renew %>% 
+  ggplot(aes(x=renewed, y=season1rat)) +
+  geom_point() +
+  labs(x="Show Renewed",
+       y = "Season 1 Rating") +
+  stat_summary(fun = 'mean', geom="bar", aes(alpha=0.5)) +
+  theme(legend.position = "none") +
+  geom_bracket(xmin="FALSE",
+               xmax="TRUE",
+               y.position=10.5,
+               label=pval1) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+```
