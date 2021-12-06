@@ -27,6 +27,7 @@ ratings <- ratings %>%
                                 ymd("2019-12-31")),
                      labels=c("1980s","1990s",
                               "2000s","2010s")))
+
 ```
 
 ```{r}
@@ -158,27 +159,36 @@ renew <- ratings %>%
   summarize(title = title,
             renewed = as.logical(renewed),
             season1rat = av_rating,
-            periode = periode) %>% 
-  ungroup() %>% 
-  group_by(periode)
+            periode = periode)
 
-#only did t-test for all years
-#need to nest(?) to run t-test by periode/decade
-pval1 <- t.test(season1rat ~ renewed, data=renew) %>%
-  tidy() %>%
-  pull(p.value) %>%
-  formatC(., format = "e", digits = 2)
+nested_renew <- renew %>% group_by(periode) %>% nest()
+
+renewed_stats <- nested_renew %>% 
+  mutate(t_test = purrr::map(data, ~t.test(.x$season1rat ~ .x$renewed), data=.x)) %>% 
+  mutate(summary = purrr::map(t_test, broom::glance)) %>% 
+  unnest(cols=c(summary)) %>%
+  ungroup() %>% 
+  dplyr::select(periode, p.value) %>% 
+  mutate(p.value = signif(p.value, digits=3),
+         group1=FALSE,
+         group2=TRUE) %>% 
+  mutate(p.value = if_else(p.value < 5e-2, true=as.character(p.value), false="n.s."))
 
 renew %>% 
   ggplot(aes(x=renewed, y=season1rat)) +
-  geom_point() +
+  stat_summary(fun = 'mean', geom="bar", fill="grey70") +
+  geom_point(alpha=0.25) +
+  facet_wrap(~periode) + 
   labs(x="Show Renewed",
        y = "Season 1 Rating") +
-  stat_summary(fun = 'mean', geom="bar", aes(alpha=0.5)) +
   theme(legend.position = "none") +
-  geom_bracket(xmin="FALSE",
-               xmax="TRUE",
-               y.position=10.5,
-               label=pval1) +
+  stat_pvalue_manual(renewed_stats, label = "p.value", tip.length = 0.01, y.position=10.5) +
+  theme_few() +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+
+# will try to have the info in this table
+# (# shows Renewed or Not by decade)
+# pop up when you scroll over each bar
+
+#renew %>% group_by(periode, renewed) %>% summarise(n=n())
 ```
