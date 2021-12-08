@@ -14,13 +14,7 @@ library(broom)
 library(ggbeeswarm)
 library(tidytext)
 library(ggpubr)
-library(DT)
-library(readr)
-library(tidytext)
-library(networkD3)
-library(forcats)
-library(plotly)
-
+library(viridis)
 ```
 
 ```{r}
@@ -33,8 +27,6 @@ ratings <- ratings %>%
                                 ymd("2019-12-31")),
                      labels=c("1980s","1990s",
                               "2000s","2010s")))
-
-shows <- read_csv("../data/IMDb_Economist_tv_ratings.csv")
 
 ```
 
@@ -51,64 +43,28 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
 ### Frame A
 
 ```{r carlos}
-force_nodes_9 <- shows %>%
+#format data for hairball plot 
+shows <- ratings %>%
   select(!share) %>%
   select(!seasonNumber) %>%
   mutate(date = (ymd(date))) %>%
   mutate(start_year = year(date)) %>%
   group_by(title) %>%
-  filter(start_year == min(start_year)) %>%
-  select(title, genres, start_year) %>%
-  mutate(decade = ifelse(start_year %in% 1990:1999, "90's", ifelse(start_year %in% 2000:2009, "00's","10's"))) %>%
-  mutate(genres = gsub("-", "", genres)) %>%
-  tibble() %>%
-  group_by(title, decade) %>% 
+  filter(start_year == min(start_year))
+
+# for bigraph
+nodes_3 <- shows %>%
+  select(title, genres) %>%
+  group_by(title) %>% 
   unique() %>%
-  unnest_tokens(output = describers, input = genres, token = "regex", pattern = ",") %>% 
-  filter(describers != "drama") %>%
-  select(describers, decade) %>%
-  group_by(decade) %>% 
-  count(describers, sort = TRUE) %>% 
-  select(describers, decade, n) %>%
-  mutate(describer_deacade = paste(describers, decade, sep = "-")) %>%
-  select(describer_deacade, n, decade) %>%
-  as.data.frame()
-
-
-force_links_7 <- shows %>%
-  select(!share) %>%
-  select(!seasonNumber) %>%
-  mutate(date = (ymd(date))) %>%
-  mutate(start_year = year(date)) %>%
-  group_by(title) %>%
-  filter(start_year == min(start_year)) %>%
-  select(title, genres, start_year) %>%
-  mutate(decade = ifelse(start_year %in% 1990:1999, "90's", ifelse(start_year %in% 2000:2009, "00's","10's"))) %>% 
   tibble() %>%
   mutate(genres = gsub("-", "", genres)) %>%
   mutate(genres = gsub("Drama", "", genres)) %>%
   mutate(genres = gsub("Drama,", "",genres)) %>%
   unnest_tokens(output = describer_bigrams, input = genres, token = "ngrams", n = 2) %>% 
-  separate(describer_bigrams, c("word1", "word2"), sep = " ") %>%
-  filter(!is.na(word1), 
-         !is.na(word2)) %>%
-  mutate(describer_deacade1 = paste(word1, decade, sep = "-"),
-         describer_deacade2 = paste(word2, decade, sep = "-")) %>%
-  count(describer_deacade1, describer_deacade2, sort = TRUE) %>%
+  count(describer_bigrams, sort = TRUE) %>%
   ungroup() %>%
-  as.data.frame() %>%
-  mutate(describer_deacade1 = factor(describer_deacade1, levels = force_nodes_9$describer_deacade)) %>%
-  mutate(describer_deacade1 = as.numeric(describer_deacade1) - 1) %>%
-   mutate(describer_deacade2 = factor(describer_deacade2, levels = force_nodes_9$describer_deacade)) %>%
-  mutate(describer_deacade2 = as.numeric(describer_deacade2) - 1)
-
-forcenet_4 <- forceNetwork(Links = force_links_7, Nodes = force_nodes_9, 
-                           Source = "describer_deacade1", Target = "describer_deacade2", 
-                           Value = "n", NodeID = "describer_deacade",  zoom = TRUE, 
-                           Nodesize = "n", Group = "decade", opacityNoHover = 1, 
-                           opacity = .6, legend = TRUE, fontSize = 10, charge = -15)
-
-forcenet_4
+  filter(!is.na(describer_bigrams))
 ```
 
 ***
@@ -138,35 +94,89 @@ rating_genre <- ratings %>%
                                 ymd("2000-01-01"),ymd("2010-01-01"),
                                 ymd("2019-12-31")),
                      labels=c("80's","90's",
-                              "2000-2009","2010-2018")))
+                              "2000-2009","2010-2018")))  
+  
+ rating_genre <-rating_genre %>%  
+  mutate(genre=fct_lump_n(genre, 7)) %>% 
+  filter(genre!="Other")
 
-top_three <- rating_genre %>% 
-  arrange(desc(overall_rating)) %>% 
-  group_by(genre, periode) %>% 
-  slice(c(1,n()))
+  
+nitys <- rating_genre %>% 
+  filter(periode == "90's") %>% 
+    plot_ly(x = ~overall_rating,
+            y = ~genre,
+            split = ~genre,
+            orientation ="h",
+    type = 'violin',
+    box = list(visible = T),
+    meanline = list(visible = T),  
+    color = ~genre,
+    showlegend=FALSE,
+    text= ~paste('</br> Title: ', title, 
+                 '</br> Rating:', overall_rating),
+    points="all",
+    hoverinfo='text'
+    ) 
+nitys <- nitys %>%
+layout(
+  title= "90's",
+  yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
 
-plot <- ggplot(data = rating_genre)+
-  geom_violin(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.5)+
-  #geom_boxplot(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
-  geom_point(data=top_three, aes(x=genre, y=overall_rating, 
-                                 color= genre, fill=genre), size=0.5)+
-  facet_wrap(~periode, ncol = 3)+
-  labs(x = "genres", 
-        y = "average rating across all seasons", 
-       color= "")+
-  theme_few()+
-  theme(legend.position = "none")+
-  coord_flip()
   
-  ggplotly(plot)
-  
-  
-  
-  
+two <- rating_genre %>% 
+  filter(periode == "2000-2009") %>% 
+    plot_ly(x = ~overall_rating,
+            y = ~genre,
+            split = ~genre,
+            orientation ="h",
+    type = 'violin',
+    box = list(visible = T),
+    meanline = list(visible = T),  
+    color = ~genre,
+    showlegend=FALSE,
+    text= ~paste('</br>Title: ', title, '</br> Rating:', overall_rating),
+    points="all",
+    hoverinfo='text') 
+two <- two %>%
+layout(
+  title = "2000-2009",
+  yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
+
   
 
- 
+ twoten <- rating_genre %>% 
+  filter(periode == "2010-2018") %>% 
+    plot_ly(x = ~overall_rating,
+            y = ~genre,
+            split = ~genre,
+            orientation ="h",
+            yaxis="",
+    type = 'violin',
+    box = list(visible = T),
+    meanline = list(visible = T),  
+    color = ~genre,
+    showlegend=FALSE,
+    text= ~paste('</br> Title: ', title, 
+                 '</br> Rating:', overall_rating),
+    points="all",
+    hoverinfo='text')
+twoten <- twoten %>%
+layout(
+  title = "2010-2019",
+ yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
+
+
+subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE)
+
   
+
+
   
   
   
@@ -177,28 +187,28 @@ plot <- ggplot(data = rating_genre)+
 
 Text about Maelle's plot
 
+
 ### Frame 3
 
+
 ```{r megan}
-#Table of top 10 shows by year
+#Interactive table of top shows by year
 top_shows <- ratings %>%
   select(title, date, av_rating, genres) %>%
   mutate(date = ymd(date),
-         year = year(date)) 
+         year = year(date)) %>%
+  separate(genres,into=c("genre1","genre2","genre3")
+           ,sep = ",") %>% 
+  pivot_longer(cols = c("genre1","genre2","genre3"),
+               values_to = "genre")
   
-top_10 <- top_shows %>%
-  group_by(year) %>%
-  select(year, title, av_rating, genres) %>%
-  slice_max(av_rating,n = 10) 
 
-datatable(top_10, colnames = c("Year", "Show Name", "Rating", "Genres")) %>% formatStyle("av_rating",
-  background = styleColorBar(top_10$av_rating, 'lightblue'),
-  backgroundSize = '98% 88%',
-  backgroundRepeat = 'no-repeat',
-  backgroundPosition = 'center')
-
-
-
+top_shows %>%
+  filter(year == 2016) %>%
+  group_by(genre) %>%
+  slice_max(av_rating,n = 1) %>%
+  ggplot +
+  geom_col(aes(x = av_rating, y = title, fill = fct_reorder(genre, av_rating)))
   
 
 ```
