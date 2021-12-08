@@ -178,12 +178,12 @@ plot <- ggplot(data = rating_genre)+
 Column {data-width=500}
 -----------------------------------------------------------------------
 ### About Show Ratings
-Add information about the data (including the data source) as well as what the dashboard can be used to explore and how to navigate it
+Add information about the data (including the data source) as well as what the dashboard can be used to explore and how to navigate it.
 
-The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well.  
+The table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well.  
 
 
-### Chart C
+### Top 10 Rated Shows per Year
 
 ```{r megan}
 #Table of top 10 shows by year
