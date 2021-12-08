@@ -2,8 +2,7 @@
 title: "Untitled"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
-    vertical_layout: fill
+    storyboard: true
 ---
 
 ```{r setup, include=FALSE}
@@ -41,11 +40,7 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
                         values_fill = NA) %>% 
                 unnest(cols = season_1:season_44)
 ```
-
-Column {data-width=500}
------------------------------------------------------------------------
-
-### Chart A
+### Frame A
 
 ```{r carlos}
 #format data for hairball plot 
@@ -72,8 +67,13 @@ nodes_3 <- shows %>%
   filter(!is.na(describer_bigrams))
 ```
 
+***
 
-### Chart B
+Text about Carlos' plot
+
+
+### Frame 2
+
 
 ```{r maelle}
 rating_genre <- ratings %>% 
@@ -183,12 +183,14 @@ subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE)
 
 ```
 
+***
+
+Text about Maelle's plot
 
 
-Column {data-width=500}
------------------------------------------------------------------------
 
-### Chart C
+### Top 10 Rated Shows per Year
+
 
 ```{r megan}
 #Interactive table of top shows by year
@@ -212,8 +214,12 @@ top_shows %>%
 
 ```
 
+***
+Add information about the data (including the data source) as well as what the dashboard can be used to explore and how to navigate it.
 
-### Chart D
+The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well. 
+
+### Frame 4
 
 ```{r casey}
 renew <- ratings %>%
@@ -257,3 +263,8 @@ renew %>%
 
 #renew %>% group_by(periode, renewed) %>% summarise(n=n())
 ```
+
+
+***
+
+Text about Casey's plot
