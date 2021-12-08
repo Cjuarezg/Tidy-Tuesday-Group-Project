@@ -15,7 +15,7 @@ library(broom)
 library(ggbeeswarm)
 library(tidytext)
 library(ggpubr)
-library(viridis)
+library(plotly)
 ```
 
 ```{r}
@@ -114,7 +114,7 @@ nitys <- rating_genre %>%
     showlegend=FALSE,
     text= ~paste('</br> Title: ', title, 
                  '</br> Rating:', overall_rating),
-    points="all",
+    points="suspectedoutliers",
     hoverinfo='text'
     ) 
 nitys <- nitys %>%
@@ -137,7 +137,7 @@ two <- rating_genre %>%
     color = ~genre,
     showlegend=FALSE,
     text= ~paste('</br>Title: ', title, '</br> Rating:', overall_rating),
-    points="all",
+    points="suspectedoutliers",
     hoverinfo='text') 
 two <- two %>%
 layout(
@@ -162,7 +162,7 @@ layout(
     showlegend=FALSE,
     text= ~paste('</br> Title: ', title, 
                  '</br> Rating:', overall_rating),
-    points="all",
+    points="suspectedoutliers",
     hoverinfo='text')
 twoten <- twoten %>%
 layout(
