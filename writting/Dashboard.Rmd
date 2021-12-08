@@ -135,8 +135,8 @@ nitys <- rating_genre %>%
     meanline = list(visible = T),  
     color = ~genre,
     showlegend=FALSE,
-    text=~title,
-    points="suspectedoutliers",
+    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    points="all",
     hoverinfo='text'
     ) 
 nitys <- nitys %>%
@@ -154,12 +154,14 @@ two <- rating_genre %>%
     box = list(visible = T),
     meanline = list(visible = T),  
     color = ~genre,
-    showlegend=FALSE) 
+    showlegend=FALSE,
+    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    points="all",
+    hoverinfo='text') 
 two <- two %>%
 layout(
-  yaxis = list(
-  title = "2000-2009",
-  zeroline = F))
+  title = "2000-2009"
+  )
 
  twoten <- rating_genre %>% 
   filter(periode == "2010-2018") %>% 
@@ -172,14 +174,16 @@ layout(
     box = list(visible = T),
     meanline = list(visible = T),  
     color = ~genre,
-    showlegend=FALSE)
+    showlegend=FALSE,
+    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    points="all",
+    hoverinfo='text')
 twoten <- twoten %>%
 layout(
-  yaxis = list(
-  title = "2010-2019",
-  zeroline = F))
+  title = "2010-2019"
+  )
 
-subplot(nitys, two, twoten)  
+
   
   
   
