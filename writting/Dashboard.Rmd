@@ -206,7 +206,8 @@ nitys <- rating_genre %>%
     text= ~paste('</br> Title: ', title, 
                  '</br> Rating:', overall_rating),
     points="suspectedoutliers",
-    hoverinfo='text'
+    hoverinfo='text',
+    scalemode="count"
     ) 
 nitys <- nitys %>%
 layout(
@@ -228,14 +229,16 @@ two <- rating_genre %>%
     color = ~genre,
     showlegend=FALSE,
     text= ~paste('</br>Title: ', title, '</br> Rating:', overall_rating),
+    scalemode="count",
     points="suspectedoutliers",
     hoverinfo='text') 
 two <- two %>%
 layout(
-  title = "2000-2009",
   yaxis=list(
-    title="Genres"),
-  xaxis=list(title="Rating"))
+    title='</br> Genres
+    </br> 2010-2018'),
+  xaxis=list(title="Rating",
+             ))
 
   
 
@@ -245,10 +248,10 @@ layout(
             y = ~genre,
             split = ~genre,
             orientation ="h",
-            yaxis="",
     type = 'violin',
     box = list(visible = T),
-    meanline = list(visible = T),  
+    meanline = list(visible = T),
+    scalemode="count",
     color = ~genre,
     showlegend=FALSE,
     text= ~paste('</br> Title: ', title, 
@@ -257,13 +260,13 @@ layout(
     hoverinfo='text')
 twoten <- twoten %>%
 layout(
-  title = "2010-2019",
  yaxis=list(
-    title="Genres"),
+    title='</br> Genres
+    </br> 2010-2018'),
   xaxis=list(title="Rating"))
 
 
-subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE)
+subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE, titleX = TRUE)
 
   
 
