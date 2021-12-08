@@ -101,29 +101,6 @@ rating_genre <- ratings %>%
   filter(genre!="Other")
 
   
-
-top_three <- rating_genre %>% 
-  arrange(desc(overall_rating)) %>% 
-  group_by(genre, periode) %>% 
-  slice(c(1,n()))
-
-plot <- ggplot(data = rating_genre)+
-  #geom_boxplot(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
-  geom_point(data=top_three, aes(x=genre, y=overall_rating, 
-                                 color= genre, fill=genre,alpha=title), size=0.5)+
-   geom_violin(aes(y = overall_rating, x=fct_infreq(genre), color=genre), size=0.3)+
-  facet_wrap(~periode, ncol = 3)+
-  labs(x = "genres", 
-        y = "average rating across all seasons", 
-       color= "")+
-  theme_few()+
-  theme(legend.position = "none")+
-  coord_flip()
-  
-plotly_json(plot)
-ggplotly(plot) %>% 
-  style(text="", hoverinfo = c('overall_rating','title'), traces = 56:106) 
-  
 nitys <- rating_genre %>% 
   filter(periode == "90's") %>% 
     plot_ly(x = ~overall_rating,
@@ -180,7 +157,8 @@ layout(
     hoverinfo='text')
 twoten <- twoten %>%
 layout(
-  title = "2010-2019"
+  title = "2010-2019",
+  xtitle="rating"
   )
 
 
