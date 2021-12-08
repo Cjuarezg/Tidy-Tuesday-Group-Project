@@ -112,13 +112,17 @@ nitys <- rating_genre %>%
     meanline = list(visible = T),  
     color = ~genre,
     showlegend=FALSE,
-    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    text= ~paste('</br> Title: ', title, 
+                 '</br> Rating:', overall_rating),
     points="all",
     hoverinfo='text'
     ) 
 nitys <- nitys %>%
 layout(
-  title= "90's")
+  title= "90's",
+  yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
 
   
 two <- rating_genre %>% 
@@ -132,13 +136,17 @@ two <- rating_genre %>%
     meanline = list(visible = T),  
     color = ~genre,
     showlegend=FALSE,
-    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    text= ~paste('</br>Title: ', title, '</br> Rating:', overall_rating),
     points="all",
     hoverinfo='text') 
 two <- two %>%
 layout(
-  title = "2000-2009"
-  )
+  title = "2000-2009",
+  yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
+
+  
 
  twoten <- rating_genre %>% 
   filter(periode == "2010-2018") %>% 
@@ -152,14 +160,21 @@ layout(
     meanline = list(visible = T),  
     color = ~genre,
     showlegend=FALSE,
-    text= ~paste('Title: ', title, '</br> Rating:', overall_rating),
+    text= ~paste('</br> Title: ', title, 
+                 '</br> Rating:', overall_rating),
     points="all",
     hoverinfo='text')
 twoten <- twoten %>%
 layout(
   title = "2010-2019",
-  xtitle="rating"
-  )
+ yaxis=list(
+    title="Genres"),
+  xaxis=list(title="Rating"))
+
+
+subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE)
+
+  
 
 
   
