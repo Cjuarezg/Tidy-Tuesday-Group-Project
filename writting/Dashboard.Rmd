@@ -188,7 +188,8 @@ subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE)
 Text about Maelle's plot
 
 
-### Frame 3
+
+### Top 10 Rated Shows per Year
 
 
 ```{r megan}
@@ -214,6 +215,7 @@ top_shows %>%
 ```
 
 ***
+Add information about the data (including the data source) as well as what the dashboard can be used to explore and how to navigate it.
 
 The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well. 
 
