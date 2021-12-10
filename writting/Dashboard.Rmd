@@ -315,19 +315,19 @@ Text about Maelle's plot
 top_shows <- ratings %>%
   select(title, date, av_rating, genres) %>%
   mutate(date = ymd(date),
-         year = year(date)) %>%
-  separate(genres,into=c("genre1","genre2","genre3")
-           ,sep = ",") %>% 
-  pivot_longer(cols = c("genre1","genre2","genre3"),
-               values_to = "genre")
-  
+         year = year(date)) 
 
-top_shows %>%
-  filter(year == 2016) %>%
-  group_by(genre) %>%
-  slice_max(av_rating,n = 1) %>%
-  ggplot +
-  geom_col(aes(x = av_rating, y = title, fill = fct_reorder(genre, av_rating)))
+top_10 <- top_shows %>%
+  group_by(year) %>%
+  select(year, title, av_rating, genres) %>%
+  slice_max(av_rating,n = 10) 
+
+datatable(top_10, colnames = c("Year", "Show Name", "Rating", "Genres")) %>%
+  formatStyle("av_rating", 
+              background = styleColorBar(top_10$av_rating, 'lightblue'),
+              backgroundSize = '98% 88%',
+              backgroundRepeat = 'no-repeat',
+              backgroundPosition = 'center')
   
 
 ```
