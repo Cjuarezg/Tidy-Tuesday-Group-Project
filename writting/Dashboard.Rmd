@@ -238,7 +238,8 @@ layout(
   yaxis=list(
     title=' Genres'),
   xaxis=list(title='
-             </br> Rating' ))
+             </br> Rating',
+             range=c(4, 10)))
 
  twoten <- rating_genre %>% 
   filter(periode == "2010-2018") %>% 
@@ -255,7 +256,8 @@ layout(
     text= ~paste('</br> Title: ', title, 
                  '</br> Rating:', overall_rating),
     points="suspectedoutliers",
-    hoverinfo='text')
+    hoverinfo='text')  
+    
 twoten <- twoten %>%
 layout(
  yaxis=list(
