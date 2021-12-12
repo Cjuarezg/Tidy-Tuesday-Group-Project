@@ -289,7 +289,8 @@ annotations <- list( list(
         yanchor = "bottom",  
         showarrow = FALSE ))
 
-subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE, titleX = TRUE, shareX = FALSE ) %>% 
+subplot(nitys,two,twoten, shareY = TRUE, 
+        titleY =TRUE, titleX = TRUE, shareX = FALSE ) %>% 
   layout(annotations = annotations)
 
   
@@ -302,8 +303,7 @@ subplot(nitys,two,twoten, shareY = TRUE, titleY =TRUE, titleX = TRUE, shareX = F
 ```
 
 ***
-
-Text about Maelle's plot
+Violin plot of the average rating per genres for 3 different decades. The outliers dot are interactive and show the rating and the title of the specific TV show. 
 
 
 
