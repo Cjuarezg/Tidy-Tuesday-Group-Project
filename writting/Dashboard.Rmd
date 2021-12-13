@@ -163,7 +163,7 @@ forcenet_5
 Text about Carlos' plot
 
 
-### Frame 2
+### Average Rating Per Genres
 
 
 ```{r maelle}
