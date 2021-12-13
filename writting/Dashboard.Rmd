@@ -46,7 +46,7 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
                 unnest(cols = season_1:season_44)
 ```
 
-### Frame A
+### Graph Visualization of Genre Bigrams Corresponding to TV Shows
 
 ```{r carlos}
 #load data 
