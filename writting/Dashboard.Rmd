@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "IMDB TV ratings from 1990-2018"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
@@ -15,7 +15,7 @@ library(ggbeeswarm)
 library(tidytext)
 library(ggpubr)
 library(plotly)
-
+library(DT)
 ```
 
 ```{r}
@@ -41,6 +41,7 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
                         values_fill = NA) %>% 
                 unnest(cols = season_1:season_44)
 ```
+
 ### Frame A
 
 ```{r carlos}
@@ -339,7 +340,7 @@ Add information about the data (including the data source) as well as what the d
 
 The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well. 
 
-### Frame 4
+### Do shows that got renewed for a second season have better first season ratings?
 
 ```{r casey}
 renew <- ratings %>%
@@ -349,34 +350,48 @@ renew <- ratings %>%
   filter(seasonNumber == 1) %>% 
   summarize(title = title,
             renewed = as.logical(renewed),
-            season1rat = av_rating,
+            season1rating = av_rating,
             periode = periode)
 
 nested_renew <- renew %>% group_by(periode) %>% nest()
 
 renewed_stats <- nested_renew %>% 
-  mutate(t_test = purrr::map(data, ~t.test(.x$season1rat ~ .x$renewed), data=.x)) %>% 
+  mutate(t_test = purrr::map(data, ~t.test(.x$season1rating ~ .x$renewed), data=.x)) %>% 
   mutate(summary = purrr::map(t_test, broom::glance)) %>% 
-  unnest(cols=c(summary)) %>%
+  unnest(cols=c(data,summary)) %>%
   ungroup() %>% 
-  dplyr::select(periode, p.value) %>% 
+  dplyr::select(periode, title, p.value) %>% 
+  group_by(periode) %>% 
+  mutate(shows = length(title)) %>%
+  ungroup() %>%
+  select(-title) %>% 
+  unique() %>% 
   mutate(p.value = signif(p.value, digits=3),
          group1=FALSE,
          group2=TRUE) %>% 
   mutate(p.value = if_else(p.value < 5e-2, true=as.character(p.value), false="n.s."))
 
-renew %>% 
-  ggplot(aes(x=renewed, y=season1rat)) +
+renew_text <- data.frame(
+  label = c("n.s.", "p=0.0132", "p=6.64e-12"),
+  periode   = c("1990s", "2000s", "2010s"),
+  x = c(FALSE, FALSE, FALSE),
+  y = c(10.25, 10.25, 10.25)
+)
+
+renew_plot <- renew %>% 
+  ggplot(aes(x=renewed, y=season1rating)) +
   stat_summary(fun = 'mean', geom="bar", fill="grey70") +
   geom_point(alpha=0.25) +
   facet_wrap(~periode) + 
   labs(x="Show Renewed",
        y = "Season 1 Rating") +
   theme(legend.position = "none") +
-  stat_pvalue_manual(renewed_stats, label = "p.value", tip.length = 0.01, y.position=10.5) +
-  theme_few() +
+  geom_text(data = renew_text,
+            mapping = aes(x=x, y=y, label=label),
+            nudge_x=0.5) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
+ggplotly(renew_plot)
 # will try to have the info in this table
 # (# shows Renewed or Not by decade)
 # pop up when you scroll over each bar
@@ -386,5 +401,4 @@ renew %>%
 
 
 ***
-
-Text about Casey's plot
+Each dot shows the season 1 rating for a particular show. Shows are grouped by whether they only had one season (renewed=FALSE) or were renewed for at least a second season (renewed=TRUE). The low p-values for the 2000s and 2010s indicate that shows that were renewed did have better rated first seasons than unrenewed shows, but in the 1990s this was not the case. The statistical power may be worse for the 1990s since there were fewer shows (n=69) than in the 2000s (n=195) or 2010s (n=590).
