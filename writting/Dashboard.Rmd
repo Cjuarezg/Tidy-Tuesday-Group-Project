@@ -46,6 +46,43 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
                 unnest(cols = season_1:season_44)
 ```
 
+
+### Overview
+
+Of the Tidy Tuesday datasets, we chose to work with a dataset that contains IMDb TV Ratings from 1990 to 2018. We have average ratings for each show's individual seasons, as well as information about when the season first aired and genre descriptions for each show. Here, we present four plots:  
+1. An interactive data table showing the Top 10 Shows per Year,  
+2. A visualization of genre bigrams (pairs of genres for each show),    
+3. Violin plots showing ratings by genre, and  
+4. A bar plot showing whether shows that were renewed for a second season actually have better season 1 ratings.
+
+### Top 10 Rated Shows per Year
+
+
+```{r megan}
+#Interactive table of top shows by year
+top_shows <- ratings %>%
+  select(title, date, av_rating, genres) %>%
+  mutate(date = ymd(date),
+         year = year(date)) 
+
+top_10 <- top_shows %>%
+  group_by(year) %>%
+  select(year, title, av_rating, genres) %>%
+  slice_max(av_rating,n = 10) 
+
+datatable(top_10, colnames = c("Year", "Show Name", "Rating", "Genres")) %>%
+  formatStyle("av_rating", 
+              background = styleColorBar(top_10$av_rating, 'lightblue'),
+              backgroundSize = '98% 88%',
+              backgroundRepeat = 'no-repeat',
+              backgroundPosition = 'center')
+  
+
+```
+
+***
+The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well. 
+
 ### Graph Visualization of Genre Bigrams Corresponding to TV Shows
 
 ```{r carlos}
@@ -311,39 +348,8 @@ subplot(nitys,two,twoten, shareY = TRUE,
 ```
 
 ***
-Violin plot of the average rating per genres for 3 different decades. The outliers dot are interactive and show the rating and the title of the specific TV show. 
+Violin plot of the average rating per genres for 3 different decades. The outlier dots are interactive and show the rating and the title of the specific TV show. 
 
-
-
-### Top 10 Rated Shows per Year
-
-
-```{r megan}
-#Interactive table of top shows by year
-top_shows <- ratings %>%
-  select(title, date, av_rating, genres) %>%
-  mutate(date = ymd(date),
-         year = year(date)) 
-
-top_10 <- top_shows %>%
-  group_by(year) %>%
-  select(year, title, av_rating, genres) %>%
-  slice_max(av_rating,n = 10) 
-
-datatable(top_10, colnames = c("Year", "Show Name", "Rating", "Genres")) %>%
-  formatStyle("av_rating", 
-              background = styleColorBar(top_10$av_rating, 'lightblue'),
-              backgroundSize = '98% 88%',
-              backgroundRepeat = 'no-repeat',
-              backgroundPosition = 'center')
-  
-
-```
-
-***
-Add information about the data (including the data source) as well as what the dashboard can be used to explore and how to navigate it.
-
-The data table includes every show that had the highest 10 ratings by year between 1990 and 2018. One can search a year to see the top 10 shows of that year or search a show to see what year that show appeared in the top 10 as well. 
 
 ### Do shows that got renewed for a second season have better first season ratings?
 
