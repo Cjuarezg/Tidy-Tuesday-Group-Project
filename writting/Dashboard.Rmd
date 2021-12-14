@@ -1,5 +1,5 @@
 ---
-title: "IMDB TV ratings from 1990-2018"
+title: "IMDb TV ratings from 1990-2018"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
@@ -49,7 +49,7 @@ wide_ratings <- ratings %>% pivot_wider(id_cols = c(title, genres, periode),
 
 ### Overview
 
-Of the Tidy Tuesday datasets, we chose to work with a dataset that contains IMDb TV Ratings from 1990 to 2018. We have average ratings for each show's individual seasons, as well as information about when the season first aired and genre descriptions for each show. Here, we present four plots:  
+Of the Tidy Tuesday datasets, we chose to work with a [dataset](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-08) that contains IMDb TV Ratings from 1990 to 2018. The data is courtesy of Sara Stoudt, and was originally posted on The Economist's GitHub. We have average ratings for each show's individual seasons, as well as information about when the season first aired and genre descriptions for each show. Here, we present four plots:  
 1. An interactive data table showing the Top 10 Shows per Year,  
 2. A visualization of genre bigrams (pairs of genres for each show),    
 3. Violin plots showing ratings by genre, and  
