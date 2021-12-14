@@ -204,7 +204,7 @@ forcenet_5
 
 ***
 
-Nodes denote genres, size of nodes denote total number of times geanre appeared, edge thickness indicates number of co-occurrence. The four networks are divided by decade in which the first season of the show aired, except for “All” for which all interactions are shown.
+Nodes denote genres, size of nodes denote total number of times genre appeared, edge thickness indicates number of co-occurrence. The four networks are divided by decade in which the first season of the show aired, except for “All” for which all interactions are shown.
 
 ### Average Rating Per Genres
 
